@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+	{{ form.non_field_errors }}
+		<div class="row">
+			<div class="col-2 col-sm-2 col-lg-2">
+			</div>
+			<div class="col-8 col-sm-8 col-lg-8">
+				<center>
+					<div class="card">
+						<div class="card-body">
+							<form method="POST" enctype="multipart/form-data">
+								{% csrf_token %}
+									{% include 'flash.html' %}
+									<div class="form-group">
+										<img id="preview" style="display: none;" src="" alt="" width="100%" height="30%"/>
+										<video controls muted autoplay loop id="videotag" style="display: none;" width="100%" height="30%">
+										  <source id="videosource" src="" type="video/mp4">
+										  Your browser does not support HTML video.
+										</video>
+										<div class="h1 text-center" id="filepreview" style="display: none;">
+											<span class="fas fa-file"></span>
+										</div>
+										<input type="hidden" name="jenisextensi" id="jenisextensi">
+									</div>
+									<div class="form-group">
+										<label class="float-left">Upload File:</label>
+										<div class="custom-file">
+											<input type="file" name="filefiled" onchange="tampilkanPreview(this,'preview')" class="custom-file-input" id="customFile">
+											<label class="custom-file-label" for="customFile"></label>
+										</div>
+									</div>
+									<h1 id="result"></h1>
+									{% for field in form %}
+										<div class="form-group">
+											<div class="float-left">{{ field.label_tag }}</div>
+											{{ field }}
+										</div>
+										<div class="form-group">
+											{% for error in field.errors %}
+												<center><p style="color: red">{{ error }}</p></center>
+											{% endfor %}
+										</div>
+									{% endfor %}
+								
+								{% if status == 'create' %}
+									<button type="submit" class="btn btn-primary float-right">Create Post</button>
+								{% else %}
+									<button type="submit" class="btn btn-primary float-right">Update Post</button>
+								{% endif %}
+							</form>
+						</div>
+					</div>
+				</center>
+			</div>
+			<div class="col-2 col-sm-2 col-lg-2">
+			</div>
+		</div>
+
+{% endblock %}
+
+{% block javascript %}
+	<script>
+	// perbaiki lagi
+	window.addEventListener('DOMContentLoaded', function() {
+		// Add the following code if you want the name of the file appear on select
+		$(".custom-file-input").on("change", function() {
+		  var fileName = $(this).val().split("\\").pop();
+		  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+		});
+	});
+	</script>
+	
+	<script>
+	const videoSrc = document.querySelector("#videotag");
+	const videoTag = document.querySelector("#videosource");
+	
+	function readVideo(event) {
+		var reader = new FileReader();
+					
+		reader.onload = function(e) {
+			console.log('loaded')
+			videoSrc.src = e.target.result
+			videoTag.load()
+		}.bind(this)
+
+		reader.readAsDataURL(event.target.files[0]);
+	}
+	
+	
+	function tampilkanPreview(gambar,preview){
+		//	membuat objek gambar
+		var gb = gambar.files;
+		//	loop untuk merender gambar
+		for (var i = 0; i < gb.length; i++){
+			//	bikin variabel
+			document.getElementById('preview').style.display = 'inline-block';
+			var gbPreview = gb[i];
+			var preview=document.getElementById(preview);
+			var reader = new FileReader();
+			var getname = document.querySelector('#customFile').value; 
+			extension = getname.split('.');
+			var looping;
+			var lastextension = "";
+			for(looping = 0; looping < extension.length; looping++){
+				lastextension = extension[looping];
+			}
+			var isImage = false;
+			var isVideo = false;
+			var isFile = false;
+			var imagetype = ["jpg", "jpeg", "gif", "png"];
+			var videotype = ["3gp", "3g2", "amv", "avi", "flv", "gif", "m4v", "mkv", "mts", "mpg", "mp2", "mpeg", "mpe", "mpv", "mpg", "mpeg", "m2v", "mov", "qt", "svi", "webm", "wmv", "mp4"];
+			var filetype = ["pptx", "pptm", "ppt", "pdf", "ppsx", "html", "pez"];
+			for(looping = 0; looping < imagetype.length; looping++){
+				if(lastextension == imagetype[looping]){
+					isImage = true;
+				}
+			}
+			for(looping = 0; looping < videotype.length; looping++){
+				if(lastextension == videotype[looping]){
+					isVideo = true;
+				}
+			}
+			for(looping = 0; looping < filetype.length; looping++){
+				if(lastextension == filetype[looping]){
+					isFile = true;
+				}
+			}
+			
+			if (isImage == true) {
+				document.getElementById('preview').style.display = 'inline';
+				document.getElementById('videotag').style.display = 'none';
+				document.getElementById('filepreview').style.display = 'none';
+				preview.file = gbPreview;
+				reader.onload = (function(element) {
+					return function(e) {
+						element.src = e.target.result;
+					};
+				})(preview);
+				//	membaca data URL gambar
+				reader.readAsDataURL(gbPreview);
+				document.getElementById("jenisextensi").value = "image";
+			}
+			else if(isVideo == true){
+				document.getElementById('preview').style.display = 'none';
+				document.getElementById('videotag').style.display = 'inline';
+				document.getElementById('videosource').style.display = 'inline';
+				document.getElementById('filepreview').style.display = 'none';
+				document.getElementById("jenisextensi").value = "video";
+				
+				// masih ada masalah disini. untuk 3gp belum bisa masuk
+				/*var source = document.getElementById('videosource');
+				gabung = 'video/' + lastextension;
+				source.setAttribute('type', gabung);*/
+				
+				readVideo(event);
+			}
+			else if(isFile == true){
+				document.getElementById('preview').style.display = 'none';
+				document.getElementById('videotag').style.display = 'none';
+				document.getElementById('filepreview').style.display = 'inline';
+				document.getElementById("jenisextensi").value = "file";
+			}
+			else{
+				//	jika tipe data tidak sesuai
+				namedata = document.getElementsByClassName("custom-file-input");
+				namedata[0].value = '';
+				document.getElementById('preview').style.display = 'none';
+				document.getElementById('videotag').style.display = 'none';
+				document.getElementById('filepreview').style.display = 'none';
+				alert("Can't upload file. Please upload your file as video or image or presentation file");
+			}
+		}
+	}
+	</script>
+{% endblock %}

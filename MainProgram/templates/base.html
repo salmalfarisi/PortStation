@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+	{% load static %}
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>{{ title }}</title>
+	<link rel="apple-touch-icon" sizes="180x180" href="{% static 'icon/apple-touch-icon.png' %}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'icon/favicon-32x32.png' %}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'icon/favicon-16x16.png' %}">
+	<link rel="manifest" href="{% static 'icon/site.webmanifest' %}">
+	<link rel="mask-icon" href="{% static 'icon/safari-pinned-tab.svg' %}" color="#5bbad5">
+	<meta name="msapplication-TileColor" content="#2d89ef">
+	<meta name="theme-color" content="#ffffff">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="{% static 'Filecss.css' %}">
+	<script src="https://kit.fontawesome.com/f382520c26.js" crossorigin="anonymous"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	{% if statusnavbar == 'login'%}
+		<style>
+			@media screen and (max-width: 767px) {
+				#trendpost{
+					display: none;
+				}
+			}
+
+			@media screen and (min-width: 768px) {
+				#trendpost{
+					display: block;
+				}
+			}
+			
+			.pdfobject-container { 
+				height: 30rem; 
+				border: 1rem solid rgba(0,0,0,.1); 
+			}
+		</style>
+		
+		{% block css %} {% endblock css %}
+	{% endif %}
+	</head>
+<body>
+	{% include 'navbar.html' %}
+	<div class="container-fluid mt-3">
+		{% block content %}
+			
+		{% endblock %}
+		{% if statusnavbar == 'login' and '/post/' not in request.path %}
+			<a href="{% url 'createpost' %}" id="UploadBTN"><span class="material-icons" style="font-size: 30px;">control_point</span></a>
+		{% elif statusnavbar == 'loginviaforum' and '/forum/index' in request.path %}
+			<a href="{% url 'createforum' %}" id="UploadBTN"><span class="material-icons" style="font-size: 20px;">add</span> Create Thread</a>
+		{% endif %}
+	</div>
+	
+	{% if needfooter == 'no' %}
+	{% else %}
+		{% include 'footer.html' %}
+	{% endif %}
+	
+</body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script>
+		$("#dropdownMenuButton").on('click', function (e) {
+			$.get('{% url "notifications:mark_all_as_read" %}',
+			  function (data, textStatus, jqXHR) {
+			    check = document.getElementById("checknotification").innerHTML;
+				if(check == "true"){
+					document.getElementById("checknotification").innerHTML = "false";
+					document.getElementById('totalnotification').style.display = 'none';
+				}
+			});
+		});
+	</script>
+	<script>
+		// search data via js
+		statusnavbar = '{{ statusnavbar }}';
+		keyword = '';
+		$("#searching").on('keyup', function (e) {
+			if (e.key === 'Enter' || e.keyCode === 13) {
+				data = document.getElementById("searching").value;
+				getdata = data.replaceAll(" ", "")
+				if(getdata.length != 0){
+					keyword = getdata;
+					window.location.href = "/searching/" + statusnavbar + "/" + keyword;
+				}
+			}
+		});
+		
+		$("#searchbutton").on('click', function (e) {
+			data = document.getElementById("searching").value;
+			getdata = data.replaceAll(" ", "")
+			if(getdata.length != 0){
+				keyword = getdata;
+				window.location.href = "/searching/" + statusnavbar + "/" + keyword;
+			}
+		});
+	</script>
+	
+	{% block javascript %} {% endblock %}
+</html>

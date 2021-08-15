@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+	{% include 'flash.html' %}
+	{% if total == 0 %}
+		<div class="row">
+			<div class="col-lg-1">
+			</div>
+			<div class="col-12 col-sm-12 col-lg-8 mt-2">
+				<div class="h4 text-dark font-weight-bold">
+					No results have been found
+				</div>
+			</div>
+			<div class="col-lg-1">
+			</div>
+		</div>
+	{% else %}
+		{{ test.id }}
+		<div class="row">
+			<div class="col-lg-1">
+			</div>
+			<div class="col-12 col-sm-12 col-lg-8 mt-2">
+				{% if statusnavbar == 'login' %}
+					<div class="h3">User</div>
+				{% else %}
+					<div class="h3">Forum</div>
+				{% endif %}
+				{% for key, value in titledata.items %}
+					{% for key2, value2 in imagedata.items %}
+						{% if key == key2 %}
+							<div class="card my-2">
+							  <div class="card-body">
+								<div class="row">
+									<div class="col-4">
+										{% if statusnavbar == 'login' %}
+											{% if value2 == 'null' %}
+												<a href="{% url 'findaccount' value %}"><img height="240px" width="240px" src="{% static 'default.png' %}"></a>
+											{% else %}
+												<a href="{% url 'findaccount' value %}"><img height="240px" width="240px" src="{{ value2.picture.url }}"></a>
+											{% endif %}
+										{% else %}
+											<a href="{% url 'detailforum' key %}"><img class="d-block w-100 h-100" src="{{ value2.picture.url }}"></a>
+										{% endif %}
+									</div>
+									<div class="col-8">
+										{% if statusnavbar == 'login' %}
+											<div>
+												<a href="{% url 'findaccount' value %}" class="h4 text-decoration-none text-dark">{{ value }}</a>
+											</div>
+										{% else %}
+											<div>
+												<a href="{% url 'detailforum' key %}" class="h4 text-decoration-none text-dark">{{ value }}</a>
+											</div>
+										{% endif %}
+									</div>
+								</div>
+							  </div>
+							</div>
+						{% endif %}
+					{% endfor %}
+				{% endfor %}
+			</div>
+			<div class="col-lg-1">
+			</div>
+		</div>
+	{% endif %}
+{% endblock %}

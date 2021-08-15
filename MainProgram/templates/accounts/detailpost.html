@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block css %} 
+	<style> 
+		hr.bold {
+		  border: 2px solid black;
+		  border-color: black;
+		  background-color: black;
+		} 
+	</style> 
+{% endblock %}
+
+{% block content %}
+	{% include 'flash.html' %}
+	<div class="row">
+		<div class="col-sm-1 col-md-1 col-lg-1">
+		</div>
+		<div class="col-12 col-sm-6 col-md-6 col-lg-6">
+			{% if typefile == 'video' %}
+				<div class="py-3">
+					<video class="card-img-top" height="360px" style="vertical-align:middle;" controls muted autoplay loop>
+						<source src="{{ file.videodata.url }}">
+						Your browser does not support HTML video.
+					</video>
+				</div>
+			{% elif typefile == 'slide' %}
+				<div class="py-3">
+					<iframe class="card-img-top" src="{% static file.slidedata.url %}" width="100%" height="360px"></iframe>
+				</div>
+			{% elif typefile == 'image' %}
+				<div class="py-3">
+					<img class="card-img-top" src="{{ file.imagedata.url }}" height="360px" alt="Card image cap">
+				</div>
+			{% endif %}
+		</div>
+		<div class="col-12 col-sm-4 col-md-4 col-lg-4 py-3">
+			<div class="card">
+			  <div class="card-body">
+				<table class="table table-borderless">
+				  <tbody>
+					<tr>
+					  <td style="height:120px; width:120px;">
+						<a href="{% url 'findaccount' userpost.username %}">
+							{% if userpostphoto == 'null' %}
+								<img src="{% static 'default.png' %}" class="rounded w-100 h-100"/>
+							{% else %}
+								<img src="{{ userpostphoto.picture.url }}" class="rounded w-100 h-100"/>
+							{% endif %}
+						</a>
+					  </td>
+					  <td style="vertical-align:middle;"><h4><a class="text-dark text-decoration-none" href="{% url 'findaccount' userpost.username %}">{{ userpost.username }}</a></h4></td>
+					</tr>
+				  </tbody>
+				</table>
+				<hr>
+				<h5 class="card-title">{{ post.title }}</h5>
+				<p>{{ post.desc|linebreaks }}</p>
+				<p class="text-right">
+					<small id="totallike" class="text-secondary">{{ peoplelikes }} likes</small>
+					{% if likethepost == True %}
+						<button onclick="likebutton('likepost')" value="{{ post.id }}" id="likepost" class="btn btn-primary btn-sm mx-1"><i class="far fa-thumbs-up"></i></button>
+					{% else %}
+						<button onclick="likebutton('likepost')" value="{{ post.id }}" id="likepost" class="btn btn-outline-primary btn-sm mx-1"><i class="far fa-thumbs-up"></i></button>
+					{% endif %}
+					{% if collected == True %}
+						<button onclick="collectpost('collectbutton', 'bookmark')" value="{{ post.id }}" id="collectbutton" class="btn btn-secondary btn-sm mx-1"><i id="bookmark" class="fas fa-bookmark"></i></button>
+					{% else %}
+						<button onclick="collectpost('collectbutton', 'bookmark')" value="{{ post.id }}" id="collectbutton" class="btn btn-outline-secondary btn-sm mx-1"><i id="bookmark" class="far fa-bookmark"></i></button>
+					{% endif %}
+				</p>
+				<hr class="bold">
+				<div class="listofcomment">
+					<small id="totalcomment" class="d-block text-secondary text-right">{{ totalcomment }} comments</small>
+					{% for key1, value1 in commentPeople.items %}
+						{% for key2, value2 in commentPeoplePhoto.items %}
+							{% for key3, value3 in commentPeopleMessage.items %}
+								{% for key4, value4 in peopleid.items %}
+									{% for key5, value5 in commentPeopleUsername.items %}
+										{% if key1 == key2 and key2 == key3 and key3 == key4 and key4 == key5 %}
+											<p class="card-text">
+												<div class="row">
+													<div class="col-4">
+														<a href="{% url 'findaccount' value5 %}">
+														{% if value2 == 'null' %}
+															<img class="rounded h-100 w-100" src="{% static 'default.png' %}">
+														{% else %}
+															<img class="rounded h-100 w-100" src="{{ value2.picture.url }}">
+														{% endif %}
+														</a>
+													</div>
+													<div class="col-6">
+														<div class="row">
+															<div class="col-12 font-weight-bold">
+																<a href="{% url 'findaccount' value5 %}" class="text-decoration-none text-dark">{{ value5 }}</a>
+															</div>
+															<div class="col-12">
+																{{ value3|linebreaks }}
+															</div>
+														</div>
+													</div>
+													<div class="col-2">
+														{% if value1 == request.session.idaccount %}
+															<button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#deleteComment" data-url="{% url 'deletecomment' value4 %}"><i class="fas fa-trash"></i></button>
+														{% endif %}
+													</div>
+												</div>
+											</p>
+										{% endif %}
+									{% endfor %}
+								{% endfor %}
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				</div>
+				<hr class="bold">
+				<table class="table table-borderless py-0">
+					<tbody>
+						<tr id="commentlist">
+						  <td class="col-10"><textarea class="form-control" rows="3" id="commentary" placeholder="your comment..."></textarea></th>
+						  <td class="col-12" style="vertical-align:middle" ><button class="btn btn-md btn-outline-success" id="commentbutton" onclick="makecomment()" disabled><i class="fas fa-paper-plane"></i></button></td>
+						</tr>
+						<tr id="warningcomment" style="display:none;" class="text-danger">
+							<td>
+								<small id="messagewarning"></small>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			  </div>
+			</div>
+		</div>
+		<div class="col-sm-1 col-md-1 col-lg-1">
+		</div>
+	</div>
+	
+	<div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">Delete Comment</h5>
+		  </div>
+		  <div class="modal-body">
+			Are you sure want to delete this comment ?
+		  </div>
+		  <div class="modal-footer">
+			<a href="#" id="deletebutton" class="btn btn-primary btn-block">Yes</a>
+			<button type="button" class="btn btn-danger btn-block my-0" data-dismiss="modal">No</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+{% endblock %}
+
+{% block javascript %}
+	
+	<script>
+		$("#commentary").change(function() {
+		  panjangdata = document.getElementById("commentary").value;
+		  var loop;
+		  var isnull = true;
+		  for(loop=0; loop < panjangdata.length; loop++){
+			cekhuruf = panjangdata.charAt(loop);
+			if(cekhuruf != ' '){
+				isnull = false;
+			}
+		  }
+		  
+		  if(panjangdata.length == 0){
+		    document.getElementById("warningcomment").style.display = 'none';
+			document.getElementById("commentbutton").disabled = true;
+		  }
+		  else{
+			if(panjangdata.length > 500){
+				document.getElementById("warningcomment").style.display = 'block';
+				document.getElementById("warningcomment").innerHTML = 'your comment length longer than 500 characters';
+				document.getElementById("commentbutton").disabled = true;
+			}
+			else{
+				if(isnull == true){
+					document.getElementById("warningcomment").style.display = 'none';
+					document.getElementById("commentbutton").disabled = true;
+				}
+				else{
+					document.getElementById("commentbutton").disabled = false;
+				}
+			}
+		  }
+		  
+		});
+	</script>
+	
+	<script>
+		window.routes = {
+		  like : '{% url "likepost" %}',
+		  makecomment : '{% url "makecomment" %}',
+		  collect : '{% url "collecpost" %}',
+		}
+	
+		function makecomment(){
+			postid = '{{ post.id }}';
+			iduser = '{{ request.session.idaccount }}';
+			username = '{{ request.session.username }}';
+			comment = document.getElementById("commentary").value;
+			urlid = "{% url 'findaccount' request.session.username %}";
+			
+			$.get(window.routes.makecomment, {'userid':iduser, 'post': postid, 'comm':comment, }).then(function(response) {
+				if(response.result == 'success'){
+					var cekimage = '{{ photo }}';
+					if(cekimage == 'null')
+					{
+						$(".listofcomment").append('<p class="card-text">'
+													+'<div class="row">'
+														+'<div class="col-4">'
+															+'<a href="'+urlid+'">'
+																+'<img class="rounded h-100 w-100" src="{% static "default.png" %}">'
+															+'</a>'
+														+'</div>'
+														+'<div class="col-6">'
+															+'<div class="row">'
+																+'<div class="col-12 font-weight-bold">'
+																	+'<a href="'+urlid+'" class="text-decoration-none text-dark">'
+																		+username
+																	+'</a>'
+																+'</div>'
+																+'<div class="col-12">'
+																	+'<p>'
+																		+response.comment
+																	+'</p>'
+																+'</div>'
+															+'</div>'
+														+'</div>'
+														+'<div class="col-2">'
+															+'<button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#deleteComment" data-url="/post/commentpost/delete/'+response.commentid+'">'
+																+'<i class="fas fa-trash"></i>'
+															+'</button>'
+														+'</div>'
+													+'</div>'
+												+'</p>');
+					}
+					else{
+						$(".listofcomment").append('<p class="card-text">'
+													+'<div class="row">'
+														+'<div class="col-4">'
+															+'<a href="'+urlid+'">'
+																+'<img class="rounded h-100 w-100" src="{{ photo.picture.url }}">'
+															+'</a>'
+														+'</div>'
+														+'<div class="col-6">'
+															+'<div class="row">'
+																+'<div class="col-12 font-weight-bold">'
+																	+'<a href="'+urlid+'" class="text-decoration-none text-dark">'
+																		+username
+																	+'</a>'
+																+'</div>'
+																+'<div class="col-12">'
+																	+'<p>'
+																		+response.comment
+																	+'</p>'
+																+'</div>'
+															+'</div>'
+														+'</div>'
+														+'<div class="col-2">'
+															+'<button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#deleteComment" data-url="/post/commentpost/delete/'+response.commentid+'">'
+																+'<i class="fas fa-trash"></i>'
+															+'</button>'
+														+'</div>'
+													+'</div>'
+												+'</p>');
+					}
+					var combine = response.totalcomment + ' comments';
+					document.getElementById("totalcomment").innerHTML = combine;
+				}
+			});
+		}
+	
+		function likebutton(id){
+			target = document.getElementById(id).value;
+			
+			$.get(window.routes.like, {id: target, }).then(function(response) {
+				if(response.result == 'like'){
+					document.getElementById(id).className = "btn btn-primary btn-sm mx-1";
+				}
+				else if(response.result == 'hate'){
+					document.getElementById(id).className = "btn btn-outline-primary btn-sm mx-1";
+				}
+				document.getElementById("totallike").innerHTML = response.totallikes + ' likes';
+			});
+		}
+		
+		function collectpost(collected, bookmarked){
+			target = document.getElementById(collected).value;
+			
+			$.get(window.routes.collect, {id: target, }).then(function(response) {
+				if(response.result == 'store'){
+					document.getElementById(collected).className = "btn btn-secondary btn-sm mx-1";
+					document.getElementById(bookmarked).className = "fas fa-bookmark";
+				}
+				else if(response.result == 'delete'){
+					document.getElementById(collected).className = "btn btn-outline-secondary btn-sm mx-1";
+					document.getElementById(bookmarked).className = "far fa-bookmark";
+				}
+			});
+		}
+	</script>
+	
+	<script>
+		$('#deleteComment').on('show.bs.modal', function (event) {
+		  var button = $(event.relatedTarget) // Button that triggered the modal
+		  var action = button.data('url') // Extract info from data-* attributes
+		  var modal = $(this)
+		  document.getElementById('deletebutton').href = action
+		  //modal.find('.modal-footer #deletebutton').href(action)
+		  //document.getElementById("deletebutton").href = action
+		  //$('#deletebutton', this).attr('href', action)
+		})
+	</script>
+	
+{% endblock %}

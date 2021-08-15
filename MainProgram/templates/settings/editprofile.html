@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+		<div class="h1 text-center">Settings</div>
+		<div class="row pt-1">
+			<div class="col-2 col-sm-2 col-lg-1">
+			</div>
+			<div class="col-2 col-sm-2 col-lg-2 pr-0">
+				{% include 'settings/sidebar.html' %}
+			</div>
+			<div class="col-8 col-sm-8 col-lg-8 pl-0">
+				<center>
+					<div class="card">
+						<div class="card-body mt-4">
+							<div class="h2 font-weight-bold text-center">
+								Edit Profile
+							</div>
+							{{ form.non_field_errors }}
+							<form method="post" enctype="multipart/form-data">
+								{% csrf_token %}
+									{% include 'flash.html' %}
+									<div class="form-group mb-4">
+										<div class="row">
+											<div class="col-sm-1 col-md-1"></div>
+											<div class="col-12 col-sm-5 col-md-5">
+												{% if photo != 'null' %}
+													<img src="{{ photo.picture.url }}" id="currentimage" style="border-radius=30%; height:300px; width:300px;">
+												{% else %}
+													<img src="{% static '/default.png' %}" id="currentimage" style="border-radius=30%; height:300px; width:300px;">
+												{% endif %}
+												<img id="preview" style="display: none; border-radius=30%;" src="" alt="" width="300px" height="300px"/>
+											</div>
+											<div class="col-12 col-sm-5 col-md-5">
+												<h3>{{ request.session.username }}</h3>
+												<h6>Change Image Profiles</h6>
+												<input type="hidden" name="users" value="{{ request.session.idaccount }}">
+												<div class="custom-file">
+													<input type="file" name="imageprofile" onchange="tampilkanPreview(this,'preview')" class="custom-file-input" id="customFile">
+													<label class="custom-file-label" for="customFile"></label>
+												</div>
+											</div>
+											<div class="col-sm-1 col-md-1"></div>
+										</div>
+									</div>
+									{% for field in profileform %}
+										<div class="form-group">
+											<div class="row">
+												<div class="col-md-1 col-lg-1"></div>
+												<div class="col-12 col-md-5 col-lg-2 text-left col-form-label">
+													{{ field.label_tag }}<br>
+												</div>
+												<div class="col-12 col-md-5 col-lg-4">
+													{{ field }}
+												</div>
+												<div class="col-12 col-md-12 col-lg-4">
+													{% for error in field.errors %}
+														<center><p style="color: red">{{ error }}</p></center>
+													{% endfor %}
+												</div>
+												<div class="col-md-1 col-lg-1"></div>
+											</div>
+										</div>
+									{% endfor %}
+								<br>
+								<div class="row">
+									<div class="col-md-1 col-lg-1"></div>
+									<div class="col-md-10 col-lg-10">
+										<button type="submit" class="btn btn-primary btn-lg float-right">Update</button>
+									</div>
+									<div class="col-md-1 col-lg-1"></div>
+							</form>
+						</div>
+					</div>
+				</center>
+			</div>
+			<div class="col-2 col-sm-2 col-lg-1">
+			</div>
+		</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+	<script>
+	window.addEventListener('DOMContentLoaded', function() {
+		// Add the following code if you want the name of the file appear on select
+		$(".custom-file-input").on("change", function() {
+		  var fileName = $(this).val().split("\\").pop();
+		  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+		});
+	});
+	</script>
+	
+	<script>
+	function tampilkanPreview(gambar,preview){
+		//	membuat objek gambar
+		var gb = gambar.files;
+		//	loop untuk merender gambar
+		for (var i = 0; i < gb.length; i++){
+		//	bikin variabel
+			document.getElementById('currentimage').style.display = 'none';
+			document.getElementById('preview').style.display = 'inline-block';
+			var gbPreview = gb[i];
+			var imageType = /image.*/;
+			var preview=document.getElementById(preview);
+			var reader = new FileReader();
+			if (gbPreview.type.match(imageType)) {
+		//	jika tipe data sesuai
+				/*
+				cara ambil data filenya. bisa digunakan untuk upload file
+				fileName = document.querySelector('#customFile').value; 
+				extension = fileName.split('.').pop(); */
+				preview.file = gbPreview;
+				reader.onload = (function(element) {
+					return function(e) {
+						element.src = e.target.result;
+					};
+				})(preview);
+		//	membaca data URL gambar
+				reader.readAsDataURL(gbPreview);
+			}else{
+		//	jika tipe data tidak sesuai
+				namedata = document.getElementsByClassName("custom-file-input");
+				namedata[0].value = '';
+				document.getElementById('preview').style.display = 'none';
+				document.getElementById('currentimage').style.display = 'inline-block';
+				alert("Can't upload image. Upload image profile with extension file : .jpeg or .png or .jpg.");
+			}
+		}
+	}
+	</script>
+{% endblock %}

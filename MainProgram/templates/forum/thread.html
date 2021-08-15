@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+	{{ form.non_field_errors }}
+		<div class="row">
+			<div class="col-2 col-sm-2 col-lg-2">
+			</div>
+			<div class="col-8 col-sm-8 col-lg-8">
+				<center>
+					<div class="card">
+						<div class="card-body">
+							<form method="POST" enctype="multipart/form-data">
+								{% csrf_token %}
+									{% include 'flash.html' %}
+									<div class="form-group">
+										{% if 'edit' in request.path %}
+											<img id="preview" style="display: block;" src="{{ data.picture.url }}" alt="" width="100%" height="30%"/>
+										{% else %}
+											<img id="preview" style="display: none;" src="" alt="" width="100%" height="30%"/>
+										{% endif %}
+									</div>
+									<div class="form-group">
+										<label class="float-left">Upload File:</label>
+										<div class="custom-file">
+											<input type="file" name="photoforum" onchange="tampilkanPreview(this,'preview')" class="custom-file-input" id="customFile">
+											<label class="custom-file-label" for="customFile"></label>
+										</div>
+									</div>
+									<h1 id="result"></h1>
+									{% for field in form %}
+										<div class="form-group">
+											<div class="float-left">{{ field.label_tag }}</div>
+											{{ field }}
+										</div>
+										<div class="form-group">
+											{% for error in field.errors %}
+												<center><p style="color: red">{{ error }}</p></center>
+											{% endfor %}
+										</div>
+									{% endfor %}
+								
+								{% if status == 'create' %}
+									<button type="submit" class="btn btn-primary float-right">Create Thread</button>
+								{% else %}
+									<button class="btn btn-danger float-left" type="button" data-toggle="modal" data-target="#deleteForumComment">Delete Article</button>
+									<button type="submit" class="btn btn-primary float-right">Update Thread</button>
+								{% endif %}
+							</form>
+						</div>
+					</div>
+				</center>
+			</div>
+			<div class="col-2 col-sm-2 col-lg-2">
+			</div>
+		</div>
+	
+	{% if status == 'edit' %}
+		<div class="modal fade" id="deleteForumComment" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Delete Article</h5>
+			  </div>
+			  <div class="modal-body">
+				Are you sure want to delete this article ?
+			  </div>
+			  <div class="modal-footer">
+				<a href="{% url 'deleteforum' data.id %}" id="deletebutton" class="btn btn-primary btn-block">Yes</a>
+				<button type="button" class="btn btn-danger btn-block my-0" data-dismiss="modal">No</button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	{% endif %}
+	
+{% endblock %}
+
+{% block javascript %}
+	<script>
+	// perbaiki lagi
+	window.addEventListener('DOMContentLoaded', function() {
+		// Add the following code if you want the name of the file appear on select
+		$(".custom-file-input").on("change", function() {
+		  var fileName = $(this).val().split("\\").pop();
+		  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+		});
+	});
+	</script>
+	
+	<script>
+	function tampilkanPreview(gambar,preview){
+		//	membuat objek gambar
+		var gb = gambar.files;
+		//	loop untuk merender gambar
+		for (var i = 0; i < gb.length; i++){
+			//	bikin variabel
+			document.getElementById('preview').style.display = 'inline-block';
+			var gbPreview = gb[i];
+			var preview=document.getElementById(preview);
+			var reader = new FileReader();
+			var getname = document.querySelector('#customFile').value; 
+			extension = getname.split('.');
+			var looping;
+			var lastextension = "";
+			for(looping = 0; looping < extension.length; looping++){
+				lastextension = extension[looping];
+			}
+			var isImage = false;
+			var imagetype = ["jpg", "jpeg", "gif", "png"];
+			for(looping = 0; looping < imagetype.length; looping++){
+				if(lastextension == imagetype[looping]){
+					isImage = true;
+				}
+			}
+			if (isImage == true) {
+				document.getElementById('preview').style.display = 'inline';
+				preview.file = gbPreview;
+				result = true;
+				width = parseInt("0");
+				height = parseInt("0");
+				reader.onload = (function(element) {
+					return function(e) {
+						element.src = e.target.result;
+						img = new Image();
+						img.src = e.target.result
+						img.onload = function() {
+							//alert(this.width + " " + this.height);
+							width = this.width;
+							height = this.height;
+							if(parseInt(width) < parseInt("1100") || parseInt(height) < parseInt("600")){
+								result = false;
+								namedata = document.getElementsByClassName("custom-file-input");
+								namedata[0].value = '';
+								document.getElementById('preview').style.display = 'none';
+								alert("Can't upload file. Please upload your image resolution size at least 1100 x 600 px");
+							}
+						};
+					};
+				})(preview);
+				//	membaca data URL gambar
+				reader.readAsDataURL(gbPreview);
+				if(result == false){
+					namedata = document.getElementsByClassName("custom-file-input");
+					namedata[0].value = '';
+					document.getElementById('preview').style.display = 'none';
+					alert("Can't upload file. Please upload your image resolution size at least 1100 x 600 px");
+				}
+			}
+			else{
+				//	jika tipe data tidak sesuai
+				namedata = document.getElementsByClassName("custom-file-input");
+				namedata[0].value = '';
+				document.getElementById('preview').style.display = 'none';
+				alert("Can't upload file. Please upload your image file");
+			}
+		}
+	}
+	</script>
+	
+{% endblock %}

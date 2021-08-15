@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+	{% include 'flash.html' %}
+	<div class="h1">
+		<center>
+			Collection
+		</center>
+	</div>
+	<hr>
+	<div class="row">
+		{% for data in collection %}
+			{% for key, value in file.items %} 
+				{% for key2, value2 in typefile.items %}
+					{% for key3, value3 in titlepost.items %}
+						{% for key4, value4 in collectpost.items %}
+							{% for key5, value5 in postids.items %}
+								{% if key == data.id and key2 == data.id and key3 == data.id and key4 == data.id and key5 == data.id %}
+									<div class="col-12 col-sm-6 col-md-6 col-lg-4">
+										<div class="py-3">
+											<div class="card">	  
+												{% if value2 == 'video' %}
+													<!--{{ data.id }} {{ value.videodata.url }} {{ value2 }}-->
+													<video class="card-img-top" height="360px" style="vertical-align:middle;" controls muted autoplay loop>
+														<source src="{{ value.videodata.url }}">Your browser does not support HTML video.
+													</video>
+												{% elif value2 == 'slide' %}
+													<!-- {{ value.slidedata.url }} {{ value }}-->
+													<!-- buat versi pc : 360px, versi tablet : 300px-->
+													<iframe class="card-img-top" src="{% static value.slidedata.url %}" width="100%" height="360px"></iframe>
+												{% elif value2 == 'image' %}
+													<!--{{ data.id }} {{ value.imagedata.url }} {{ value2 }}-->
+													<img class="card-img-top" src="{{ value.imagedata.url }}" height="360px" alt="Card image cap">
+												{% endif %}
+												<div class="card-body">
+													<div class="row">
+														<div class="col-8">
+															<a href="#" class="text-dark"><div class="h5">{{ data.title|truncatechars:20 }}</div></a>
+														</div>
+														<div class="col-4">
+															{% if value4 == True %}
+																<button onclick="collectpost('collect{{ value3 }}', 'icon{{ value3 }}')" value="{{ value5 }}" id="collect{{ value3 }}" class="btn btn-secondary btn-sm float-right mx-1"><i id="icon{{ value3 }}" class="fas fa-bookmark"></i></button>
+															{% else %}
+																<button onclick="collectpost('collect{{ value3 }}', 'icon{{ value3 }}')" value="{{ value5 }}" id="collect{{ value3 }}" class="btn btn-outline-secondary btn-sm float-right mx-1"><i id="icon{{ value3 }}" class="far fa-bookmark"></i></button>
+															{% endif %}	
+															<a href="{% url 'detailpost' value5 %}" class="btn btn-info btn-sm float-right"><span class="fas fa-eye"></span></a>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								{% endif %}
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				{% endfor %}
+			{% endfor %}
+		{% endfor %}
+	</div>
+	<hr>	
+{% endblock content %}
+
+{% block javascript %}
+	<script>
+		window.routes = {
+		  collect : '{% url "collecpost" %}',
+		}
+		
+		function collectpost(id, icon){
+			target = document.getElementById(id).value;
+			
+			$.get(window.routes.collect, {id: target, }).then(function(response) {
+				if(response.result == 'store'){
+					document.getElementById(id).className = "btn btn-secondary btn-sm float-right mx-1";
+					document.getElementById(icon).className = "fas fa-bookmark";
+				}
+				else if(response.result == 'delete'){
+					document.getElementById(id).className = "btn btn-outline-secondary btn-sm float-right mx-1";
+					document.getElementById(icon).className = "far fa-bookmark";
+				}
+			});
+		}
+	</script>
+{% endblock %}

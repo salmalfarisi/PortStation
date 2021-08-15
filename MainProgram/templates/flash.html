@@ -1,0 +1,42 @@
+{% for message in messages %}
+    {% if 'success' in message.tags %}
+
+        <div class="alert alert-success">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+
+                {{ message }}
+
+        </div>
+    {% endif %}
+{% endfor %}
+
+{% for message in messages %}
+    {% if 'error' in message.tags %}
+        <div class="alert alert-error alert-danger">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+
+                {{ message }}
+
+        </div>
+    {% endif %}
+{% endfor %}
+{% for message in messages %}
+    {% if 'info' in message.tags %}
+        <div class="alert alert-info">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+
+                {{ message }}
+
+        </div>
+    {% endif %}
+{% endfor %}
+{% for message in messages %}
+    {% if 'warning' in message.tags %}
+        <div class="alert alert-warning">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+
+                {{ message }}
+
+        </div>
+    {% endif %}
+{% endfor %}

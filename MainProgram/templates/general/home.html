@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+	{% include 'flash.html' %}
+	<div class="row">
+		<div class="col-lg-1">
+		</div>
+		<div class="col-12 col-sm-12 col-md-8 col-lg-6">
+			<div id="main-content">
+				{% for data in post %}
+					{% for key, value in file.items %} 
+						{% for key2, value2 in typefile.items %}
+							{% for key3, data.id in loop.items %}
+								{% for key4, value4 in likepoststatus.items %}
+									{% for key5, value5 in collectpoststatus.items %}
+										{% for key6, value6 in likecount.items %}
+											{% for key7, value7 in photoprofile.items %}
+												{% for key8, value8 in usernameprofile.items %}
+													{% if key == data.id and key == key2 and key2 == key3 and key3 == key4 and key4 == key5 and key5 == key6 and key6 == key7 and key7 == key8 %}
+														<div class="py-3">
+															<div class="card">
+																<div class="card-body">
+																	<div class="row">
+																		<div class="col-9 col-sm-8">
+																			<div class="row">
+																				<div class="col-4 col-sm-3 col-md-3 col-lg-3">
+																					{% if value7 == 'null' %}
+																						<span><img class="img-fluid rounded-circle" src="{% static 'default.png' %}" style="border-radius: 20%" width="50px" height="50px"/></span>
+																					{% else %}
+																						<span><img class="img-fluid rounded-circle" src="{{ value7.picture.url }}" style="border-radius: 20%; min-width:50px; min-height:50px;" width="50px" height="50px"/></span>
+																					{% endif %}
+																				</div>
+																				<div class="col-8 col-sm-9 col-md-9 col-lg-9">
+																					<div class="h4">{{ value8 }}</div>
+																				</div>
+																			</div>
+																		</div>
+																		<div class="col-3 col-sm-4">
+																			{% if data.userID_id == request.session.idaccount %}
+																				<div class="dropleft float-right">
+																				  <button class="btn btn-default btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																					<span class="fas fa-ellipsis-h"></span>
+																				  </button>
+																				  <div class="dropdown-menu">
+																					<a class="dropdown-item btn-default" href="{% url 'editpost' data.id %}">Edit</a>
+																					<button class="dropdown-item btn-default" type="button" data-toggle="modal" data-target="#deletePost" data-url="{% url 'deletepost' data.id 'home' %}">Delete</button>
+																				  </div>
+																				</div>
+																			{% endif %}
+																		</div>
+																	</div>
+																</div>
+																{% if value2 == 'video' %}
+																	<video class="card-img-top" height="360px" style="vertical-align:middle;" controls muted autoplay loop>
+																		<source src="{{ value.videodata.url }}">
+																		Your browser does not support HTML video.
+																	</video>
+																{% elif value2 == 'slide' %}
+																	<iframe class="card-img-top" src="{% static value.slidedata.url %}" width="100%" height="360px"></iframe>
+																{% elif value2 == 'image' %}
+																	<img class="card-img-top" src="{{ value.imagedata.url }}" height="360px" alt="Card image cap">
+																{% endif %}
+																<div class="card-body">
+																	<div class="row">
+																		<div class="col-8 col-sm-8 col-md-8 col-lg-9">
+																			<a href="{% url 'detailpost' data.id %}" class="text-dark"><h5 class="card-title">{{ data.title|truncatechars:20 }}</h5></a>
+																		</div>
+																		<div class="col-4 col-sm-4 col-md-4 col-lg-3">
+																			<div class="row">
+																				<div class="col-12">
+																					{% if value5 == True %}
+																						<button onclick="collectpost('collect{{ data.id }}', 'icon{{ data.id }}')" value="{{ data.id }}" id="collect{{ data.id }}" class="btn btn-secondary btn-sm float-right mx-1"><i id="icon{{ data.id }}" class="fas fa-bookmark"></i></button>
+																					{% else %}
+																						<button onclick="collectpost('collect{{ data.id }}', 'icon{{ data.id }}')" value="{{ data.id }}" id="collect{{ data.id }}" class="btn btn-outline-secondary btn-sm float-right mx-1"><i id="icon{{ data.id }}" class="far fa-bookmark"></i></button>
+																					{% endif %}
+																					
+																					{% if value4 == True %}
+																						<button onclick="likebutton('like{{ data.id }}', 'totallike{{ data.id }}')" value="{{ data.id }}" id="like{{ data.id }}" class="btn btn-primary btn-sm float-right mx-1"><i class="far fa-thumbs-up"></i></button>
+																					{% else %}
+																						<button onclick="likebutton('like{{ data.id }}', 'totallike{{ data.id }}')" value="{{ data.id }}" id="like{{ data.id }}" class="btn btn-outline-primary btn-sm float-right mx-1"><i class="far fa-thumbs-up"></i></button>
+																					{% endif %}
+																					<a href="{% url 'detailpost' data.id %}" class="btn btn-info btn-sm float-right"><span class="fas fa-eye"></span></a>
+																				</div>
+																				<div class="col-12">
+																					<center><small class="text-secondary" id="totallike{{ data.id }}">{{ value6 }} likes</small></center>
+																				</div>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+													{% endif %}
+												{% endfor %}
+											{% endfor %}
+										{% endfor %}
+									{% endfor %}
+								{% endfor %}
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				{% endfor %}
+				<br>
+			</div>
+			{% for data in post %}
+				{% if forloop.counter == 2 %}
+					<div class="d-flex justify-content-center" id="btnflex">
+						<button class="btn btn-secondary btn-sm" id="loaddatabtn" value="1"><span class="material-icons">expand_more</span></button>
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+		<div class="col-md-4 col-lg-4" id="trendpost">
+			<center>
+				<div class="h3">
+					Trending Post
+				</div>
+			</center>
+			<div class="row">
+				{% for key, value in trendfile.items %} 
+					{% for key2, value2 in trendextfile.items %}
+						{% for key3, data.id in trendtitle.items %}
+							{% for key4, value4 in trenduser.items %}
+								{% for key5, value5 in trendidpost.items %}
+									{% if key == key2 and key2 == key3 and key3 == key4 and key4 == key5 %}
+										<div class="col-6">
+											<div class="card">
+												<div class="card-body">
+													<a href="{% url 'detailpost' value5 %}">
+														{% if value2 == 'video' %}
+															<video class="card-img-top" height="141px" width="141px" style="vertical-align:middle;" controls muted autoplay loop>
+																<source src="{{ value.videodata.url }}">
+																Your browser does not support HTML video.
+															</video>
+														{% elif value2 == 'slide' %}
+															<iframe class="card-img-top" src="{% static value.slidedata.url %}" width="141px" height="141px"></iframe>
+														{% elif value2 == 'image' %}
+															<img class="card-img-top" src="{{ value.imagedata.url }}" width="141px" height="141px" alt="Card image cap">
+														{% endif %}
+													</a>
+												</div>
+											</div>
+										</div>
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				{% endfor %}
+			</div>
+		</div>
+		<div class="col-lg-1">
+		</div>
+	</div>
+	
+	<div class="modal fade" id="deletePost" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">Delete Post</h5>
+		  </div>
+		  <div class="modal-body">
+			Are you sure want to delete this post ?
+		  </div>
+		  <div class="modal-footer">
+			<a href="#" id="deletebutton" class="btn btn-primary btn-block">Yes</a>
+			<button type="button" class="btn btn-danger btn-block my-0" data-dismiss="modal">No</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+{% endblock %}
+
+{% block javascript %}
+	<script>
+		window.routes = {
+		  like : '{% url "likepost" %}',
+		  collect : '{% url "collecpost" %}',
+		  loaddata : '{% url "loadmoredatas" %}', 
+		}
+	
+		function likebutton(id, total){
+			target = document.getElementById(id).value;
+			
+			$.get(window.routes.like, {id: target, }).then(function(response) {
+				if(response.result == 'like'){
+					document.getElementById(id).className = "btn btn-primary btn-sm float-right mx-1";
+				}
+				else if(response.result == 'hate'){
+					document.getElementById(id).className = "btn btn-outline-primary btn-sm float-right mx-1";
+				}
+				document.getElementById(total).innerHTML = response.totallikes + ' likes';
+			});
+		}
+		
+		function collectpost(id, icon){
+			target = document.getElementById(id).value;
+			
+			$.get(window.routes.collect, {id: target, }).then(function(response) {
+				if(response.result == 'store'){
+					document.getElementById(id).className = "btn btn-secondary btn-sm float-right mx-1";
+					document.getElementById(icon).className = "fas fa-bookmark";
+				}
+				else if(response.result == 'delete'){
+					document.getElementById(id).className = "btn btn-outline-secondary btn-sm float-right mx-1";
+					document.getElementById(icon).className = "far fa-bookmark";
+				}
+			});
+		}
+	</script>
+	
+	<script>
+		$('#deletePost').on('show.bs.modal', function (event) {
+		  var button = $(event.relatedTarget) // Button that triggered the modal
+		  var action = button.data('url') // Extract info from data-* attributes
+		  var modal = $(this)
+		  document.getElementById('deletebutton').href = action
+		  //modal.find('.modal-footer #deletebutton').href(action)
+		  //document.getElementById("deletebutton").href = action
+		  //$('#deletebutton', this).attr('href', action)
+		})
+	</script>
+	
+	{% for data in post %}
+		{% if forloop.counter == 2 %}
+			<script>
+				$("#loaddatabtn").click(function() {
+					target = document.getElementById('loaddatabtn').value;
+			
+					$.get(window.routes.loaddata, {page: target, typerequest: 'post'}).then(function(response) {
+						if(response.totalpost == '0'){
+							$("#btnflex").empty();
+							$("#main-content").append('<div class="d-flex justify-content-center">'
+														+'<div class="h4">You don\'t have any more post. try to refresh again</div>'
+													  +'</div>');
+						}
+						else{
+							var i = 0;
+							$.each(response.loadpostid, function (id1, loadpostiddata) {
+								var j = 0;
+								$.each(response.loadposttitle, function (id2, loadposttitledata) {
+									var k = 0;
+									$.each(response.loadpostfile, function (id3, loadpostfiledata) {
+										var l = 0;
+										$.each(response.loadextfile, function (id4, loadextfiledata) {
+											var n = 0;
+											$.each(response.loadlikestatus, function (id6, loadlikestatusdata) {
+												var o = 0;
+												$.each(response.loadcollectstatus, function (id7, loadcollectstatusdata) {
+													var p = 0;
+													$.each(response.loadtotallike, function (id8, loadtotallikedata) {
+														var q = 0;
+														$.each(response.loadusernamePeople, function (id8, loadusernamePeopledata) {
+															var m = 0;
+															$.each(response.loaduserphotoPeople, function (id8, loaduserphotoPeopledata) {
+																if(i == j && j == k && k == l && l == n && n == o && o == p && p == q && q == m){
+																	if(loaduserphotoPeopledata == 'null'){
+																		userphoto = '<span><img class="img-fluid rounded-circle" src="{% static "default.png" %}" style="border-radius: 20%" width="50px" height="50px"/></span>'
+																	}
+																	else{
+																		userphoto = '<span><img class="img-fluid rounded-circle" src="'+loaduserphotoPeopledata+'" style="border-radius: 20%" width="50px" height="50px"/></span>'
+																	}
+																	if(loadusernamePeopledata == '{{ request.session.username }}'){
+																		userschoice = '<div class="dropleft float-right">'
+																						  +'<button class="btn btn-default btn-sm" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
+																							+'<span class="fas fa-ellipsis-h"></span>'
+																						  +'</button>'
+																						  +'<div class="dropdown-menu">'
+																							+'<a class="dropdown-item btn-default" href="post/edit/'+loadpostiddata+'">Edit</a>'
+																							+'<button class="dropdown-item btn-default" type="button" data-toggle="modal" data-target="#deletePost" data-url="post/delete/'+loadpostiddata+'/home">Delete</button>'
+																						  +'</div>'
+																						+'</div>'
+																	}
+																	else{
+																		userschoice = ''
+																	}
+																	
+																	
+																	if(loadextfiledata == 'video'){
+																		content = '<video class="card-img-top" height="360px" width="360px" style="vertical-align:middle;" controls muted autoplay loop>'
+																						+'<source src="'+loadpostfiledata+'">'
+																						+'Your browser does not support HTML video.'
+																					+'</video>'
+																	}
+																	else if(loadextfiledata == 'slide'){
+																		content = '<iframe class="card-img-top" src="'+loadpostfiledata+'" width="360px" height="360px"></iframe>'
+																	}
+																	else if(loadextfiledata == 'image'){
+																		content = '<img class="card-img-top" src="'+loadpostfiledata+'" width="360px" height="360px" alt="Card image cap">'
+																	}
+																	
+																	if(loadlikestatusdata == true){
+																		likestatusdata = '<button onclick="likebutton(\'like'+loadpostiddata+'\'), \'totallike'+loadpostiddata+'\')" value="'+loadpostiddata+'" id="like'+loadpostiddata+'" class="btn btn-primary btn-sm float-right mx-1"><i class="far fa-thumbs-up"></i></button>'
+																	}
+																	else{
+																		likestatusdata = '<button onclick="likebutton(\'like'+loadpostiddata+'\'), \'totallike'+loadpostiddata+'\')" value="'+loadpostiddata+'" id="like'+loadpostiddata+'" class="btn btn-outline-primary btn-sm float-right mx-1"><i class="far fa-thumbs-up"></i></button>'
+																	}
+																	
+																	if(loadcollectstatusdata == true){
+																		collectionstatusdata = '<button onclick="collectpost(\'collect'+loadpostiddata+'\', \'icon'+loadpostiddata+'\')" value="'+loadpostiddata+'" id="collect'+loadpostiddata+'" class="btn btn-secondary btn-sm float-right mx-1"><i id="icon'+loadpostiddata+'" class="fas fa-bookmark"></i></button>'
+																	}
+																	else{
+																		collectionstatusdata = '<button onclick="collectpost(\'collect'+loadpostiddata+'\', \'icon'+loadpostiddata+'\')" value="'+loadpostiddata+'" id="collect'+loadpostiddata+'" class="btn btn-outline-secondary btn-sm float-right mx-1"><i id="icon'+loadpostiddata+'" class="far fa-bookmark"></i></button>'
+																	}
+																	
+																	title = loadposttitledata.length;
+																	if(title > parseInt("20")){
+																		loadtitles = loadposttitledata.substr(0,2) + '...';
+																	}
+																	else{
+																		loadtitles = loadposttitledata;
+																	}
+																	
+																	$("#main-content").append('<div class="py-3">'
+																									+'<div class="card">'
+																										+'<div class="card-body">'
+																											+'<div class="row">'
+																												+'<div class="col-9 col-sm-8">'
+																													+'<div class="row">'
+																														+'<div class="col-4 col-sm-3 col-md-3 col-lg-3">'
+																															+userphoto
+																														+'</div>'
+																														+'<div class="col-8 col-sm-9 col-md-9 col-lg-9">'
+																															+'<div class="h4">'+loadusernamePeopledata+'</div>'
+																														+'</div>'
+																													+'</div>'
+																												+'</div>'
+																												+'<div class="col-3 col-sm-4">'
+																													+userschoice
+																												+'</div>'
+																											+'</div>'
+																										+'</div>'
+																										+content
+																										+'<div class="card-body">'
+																											+'<div class="row">'
+																												+'<div class="col-8 col-sm-8 col-md-8 col-lg-9">'
+																													+'<a href="post/show/'+loadpostiddata+'" class="text-dark"><h5 class="card-title">'+loadtitles+'</h5></a>'
+																												+'</div>'
+																												+'<div class="col-4 col-sm-4 col-md-4 col-lg-3">'
+																													+'<div class="row">'
+																														+'<div class="col-12">'
+																															+collectionstatusdata+likestatusdata
+																															+'<a href="post/show/'+loadpostiddata+'" class="btn btn-info btn-sm float-right"><span class="fas fa-eye"></span></a>'
+																														+'</div>'
+																														+'<div class="col-12">'
+																															+'<center><small class="text-secondary" id="totallike'+loadpostiddata+'">'+loadtotallikedata+' likes</small></center>'
+																														+'</div>'
+																													+'</div>'
+																												+'</div>'
+																											+'</div>'
+																										+'</div>'
+																									+'</div>'
+																								+'</div>');
+																}
+																m = m + 1;
+															});
+															q = q + 1;
+														});
+														p = p + 1;
+													});
+													o = o + 1;
+												});
+												n = n + 1;
+											});
+											l = l + 1;
+										});
+										k = k + 1;
+									});
+									j = j + 1;
+								});
+								i = i + 1;
+							});
+							
+							document.getElementById("loaddatabtn").value = response.nextpage;
+						}
+					});
+				});
+			</script>
+		{% endif %}
+	{% endfor %}
+{% endblock %}

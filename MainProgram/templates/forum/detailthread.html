@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block css %} 
+	<style> 
+		hr.bold {
+		  border: 2px solid black;
+		  border-color: black;
+		  background-color: black;
+		} 
+	</style> 
+{% endblock %}
+{% block content %}
+	{% include 'flash.html' %}
+	<div class="row">
+		<div class="col-sm-1 col-md-1 col-lg-1">
+		</div>
+		<div class="col-12 col-sm-12 col-md-7 col-lg-7">
+			<img class="card-img-top" src="{{ forum.picture.url }}" height="480px" alt="Card image cap">
+			<h5 class="card-title mt-2">{{ forum.title }}</h5>
+			<p>Created by : {{ creator.username }} | {{ forum.created_at }} {% if forum.userID_id == request.session.idaccount and request.session.idaccount != None %}| <a href="{% url 'editforum' forum.id %}" class="badge badge-info">Edit your article</a> {% endif %}</p>
+			<p>{{ forum.article|linebreaks }}</p>
+			<div class="listofcomment">
+				{% for key1, value1 in commentPeople.items %}
+					{% for key2, value2 in commentPeoplePhoto.items %}
+						{% for key3, value3 in commentPeopleMessage.items %}
+							{% for key4, value4 in peopleid.items %}
+								{% for key5, value5 in commentPeopleUsername.items %}
+									{% if key1 == key2 and key2 == key3 and key3 == key4 and key4 == key5 %}
+										<p class="card-text">
+											<div class="row">
+												<div class="col-3">
+													<center>
+														<a href="{% url 'findaccount' value5 %}">
+															{% if value2 == 'null' %}
+																<img class="rounded h-75 w-75" src="{% static 'default.png' %}">
+															{% else %}
+																<img class="rounded h-75 w-75" src="{{ value2.picture.url }}">
+															{% endif %}
+														</a>
+													</center>
+												</div>
+												<div class="col-7">
+													<div class="h5">
+														<a href="{% url 'findaccount' value5 %}" class="text-decoration-none text-dark">
+															{{ value5 }}
+														</a>
+													</div>
+													<p>{{ value3|linebreaks }}</p>
+												</div>
+												<div class="col-2">
+													{% if value1 == request.session.idaccount and request.session.idaccount != None %}
+														<button class="btn btn-danger btn-sm" type="button" data-toggle="modal" data-target="#deleteComment" data-url="{% url 'deleteforumcomment' value4 %}"><i class="fas fa-times"></i></button>
+													{% endif %}
+												</div>
+											</div>
+										</p>
+									{% endif %}
+								{% endfor %}
+							{% endfor %}
+						{% endfor %}
+					{% endfor %}
+				{% endfor %}
+			</div>
+			<hr class="bold">
+			{% if request.session.idaccount is none %}
+				<div class="h3 text-center">Create or Login into your account to make comment</div>
+			{% else %}
+				<table class="table table-borderless py-0">
+					<tbody>
+						<tr id="commentlist">
+						  <td class="col-10"><textarea class="form-control" rows="3" id="commentary" placeholder="your comment..."></textarea></th>
+						  <td class="col-12" style="vertical-align:middle" ><button class="btn btn-md btn-outline-success" id="commentbutton" onclick="makecomment()" disabled><i class="fas fa-paper-plane"></i></button></td>
+						</tr>
+						<tr id="warningcomment" style="display:none;" class="text-danger">
+							<td>
+								<small id="messagewarning"></small>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			{% endif %}
+		</div>
+		<div class="col-12 col-sm-12 col-md-3 col-lg-3">
+			Suggestion
+			{% for data in suggestion %}
+				<div class="card my-2">
+				  <div class="card-body">
+					<div>
+						<a href="{% url 'detailforum' data.id %}" class="text-decoration-none text-dark text-justify">{{ data.title }}</a>
+					</div>
+				  </div>
+				</div>
+			{% endfor %}
+		</div>
+		<div class="col-sm-1 col-md-1 col-lg-1">
+		</div>
+	</div>
+	
+	{% if request.session.username != None %}
+		<div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Delete Comment</h5>
+			  </div>
+			  <div class="modal-body">
+				Are you sure want to delete this comment ?
+			  </div>
+			  <div class="modal-footer">
+				<a href="#" id="deletebutton" class="btn btn-primary btn-block">Yes</a>
+				<button type="button" class="btn btn-danger btn-block my-0" data-dismiss="modal">No</button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+	{% if request.session.username != None %}
+		
+		<script>
+			$("#commentary").change(function() {
+			  panjangdata = document.getElementById("commentary").value;
+			  var loop;
+			  var isnull = true;
+			  for(loop=0; loop < panjangdata.length; loop++){
+				cekhuruf = panjangdata.charAt(loop);
+				if(cekhuruf != ' '){
+					isnull = false;
+				}
+			  }
+			  
+			  if(panjangdata.length == 0){
+				document.getElementById("warningcomment").style.display = 'none';
+				document.getElementById("commentbutton").disabled = true;
+			  }
+			  else{
+				if(panjangdata.length > 1000){
+					document.getElementById("warningcomment").style.display = 'block';
+					document.getElementById("warningcomment").innerHTML = 'your comment length longer than 1000 characters';
+					document.getElementById("commentbutton").disabled = true;
+				}
+				else{
+					if(isnull == true){
+						document.getElementById("warningcomment").style.display = 'none';
+						document.getElementById("commentbutton").disabled = true;
+					}
+					else{
+						document.getElementById("commentbutton").disabled = false;
+					}
+				}
+			  }
+			  
+			});
+		</script>
+		
+		<script>
+			window.routes = {
+			  makeforumcomment : '{% url "makeforumcomment" %}',
+			}
+		
+			function makecomment(){
+				forumid = '{{ forum.id }}';
+				iduser = '{{ request.session.idaccount }}';
+				username = '{{ request.session.username }}';
+				comment = document.getElementById("commentary").value;
+				urlid = "{% url 'findaccount' request.session.username %}";
+				
+				$.get(window.routes.makeforumcomment, {'userid':iduser, 'forum': forumid, 'comm':comment, }).then(function(response) {
+					if(response.result == 'success'){
+						var cekimage = '{{ photo }}';
+						if(cekimage == 'null')
+						{
+						
+							$(".listofcomment").append('<p class="card-text">'
+														+'<div class="row">'
+															+'<div class="col-3">'
+																+'<center>'
+																	+'<a href="'+urlid+'">'
+																		+'<img class="rounded h-75 w-75" src="{% static "default.png" %}">'
+																	+'</a>'
+																+'</center>'
+															+'</div>'
+															+'<div class="col-7">'
+																+'<div class="h5">'
+																	+'<a href="'+urlid+'" class="text-decoration-none text-dark">'
+																		+'{{ request.session.username }}'
+																	+'</a>'
+																+'</div>'
+																+'<p>'+response.comment+'</p>'
+															+'</div>'
+															+'<div class="col-2">'
+																+'<button class="btn btn-danger btn-sm" type="button" data-toggle="modal" data-target="#deleteComment" data-url="/forum/commentforum/delete/'+response.commentid+'">'
+																	+'<i class="fas fa-times"></i>'
+																+'</button>'
+															+'</div>'
+														+'</div>'
+													+'</p>');
+						}
+						else{
+							$(".listofcomment").append('<p class="card-text">'
+														+'<div class="row">'
+															+'<div class="col-3">'
+																+'<center>'
+																	+'<a href="'+urlid+'">'
+																		+'<img class="rounded h-75 w-75" src="{{ photo.picture.url }}">'
+																	+'</a>'
+																+'</center>'
+															+'</div>'
+															+'<div class="col-7">'
+																+'<div class="h5">'
+																	+'<a href="'+urlid+'" class="text-decoration-none text-dark">'
+																		+'{{ request.session.username }}'
+																	+'</a>'
+																+'</div>'
+																+'<p>'+response.comment+'</p>'
+															+'</div>'
+															+'<div class="col-2">'
+																+'<button class="btn btn-danger btn-sm" type="button" data-toggle="modal" data-target="#deleteComment" data-url="/forum/commentforum/delete/'+response.commentid+'">'
+																	+'<i class="fas fa-times"></i>'
+																+'</button>'
+															+'</div>'
+														+'</div>'
+													+'</p>');
+						}
+						var combine = response.totalcomment + ' comments';
+						document.getElementById("totalcomment").innerHTML = combine;
+					}
+				});
+			}
+		</script>
+		
+		<script>
+			$('#deleteComment').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  var action = button.data('url') // Extract info from data-* attributes
+			  var modal = $(this)
+			  document.getElementById('deletebutton').href = action
+			  //modal.find('.modal-footer #deletebutton').href(action)
+			  //document.getElementById("deletebutton").href = action
+			  //$('#deletebutton', this).attr('href', action)
+			})
+		</script>
+		
+	{% endif %}
+{% endblock %}

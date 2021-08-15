@@ -1,0 +1,36 @@
+{% if request.path == '/setting/profile' %}
+	<div class="font-weight-bold bg-secondary border border-secondary border-left-0 border-right-0">
+{% else %}
+	<div class="border border-left-0 border-right-0">
+{% endif %}
+	<div class=" py-3 container">
+		<a href="{% if request.path == '/setting/profile' %}#{% else %}{% url 'editprofile' %}{% endif %}" class="text-decoration-none {% if request.path == '/setting/profile' %}text-white{% else %}text-dark{% endif %}">Edit Profile</a>
+	</div>
+</div>
+{% if request.path == '/setting/blocklist' %}
+	<div class="font-weight-bold bg-secondary border border-secondary border-left-0 border-right-0">
+{% else %}
+	<div class="border border-left-0 border-right-0">
+{% endif %}
+	<div class="py-3 container">
+		<a href="{% if request.path == '/setting/blocklist' %}#{% else %}{% url 'blocklist' %}{% endif %}" class="text-decoration-none {% if request.path == '/setting/blocklist' %}text-white{% else %}text-dark{% endif %}">Blocklist</a>
+	</div>
+</div>
+{% if request.path == '/setting/history' %}
+	<div class="font-weight-bold bg-secondary border border-secondary border-left-0 border-right-0">
+{% else %}
+	<div class="border border-left-0 border-right-0">
+{% endif %}
+	<div class="py-3 container">
+		<a href="{% if request.path == '/setting/history' %}#{% else %}{% url 'history' %}{% endif %}" class="text-decoration-none  {% if request.path == '/setting/history' %}text-white{% else %}text-dark{% endif %}">History</a>
+	</div>
+</div>
+{% if request.path == '/setting/password' %}
+	<div class="font-weight-bold bg-secondary border border-secondary border-left-0 border-right-0">
+{% else %}
+	<div class="border border-left-0 border-right-0">
+{% endif %}
+	<div class="py-3 container">
+		<a href="{% if request.path == '/setting/password' %}#{% else %}{% url 'changepassword' %}{% endif %}" class="text-decoration-none  {% if request.path == '/setting/password' %}text-white{% else %}text-dark{% endif %}">Change Password</a>
+	</div>
+</div>
